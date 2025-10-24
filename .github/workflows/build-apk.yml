@@ -17,6 +17,11 @@ jobs:
       - name: Build APK
         run: |
           chmod +x build-apk.sh
+          - name: Upload APK
+  uses: actions/upload-artifact@v3
+  with:
+    name: iroku-apk
+    path: android/app/build/outputs/apk/release/app-release-unsigned.apk
           ./build-apk.sh
       - name: Upload APK
         uses: actions/upload-artifact@v3
