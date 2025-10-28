@@ -1,24 +1,22 @@
-name: Build APK
-
-on:
-  workflow_dispatch:     # activador manual
-  push:
-    branches: [ main ]   # activador automático al hacer push
-
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Build APK
-        run: |
-          echo "Aquí pondrás el comando para compilar tu APK, por ejemplo:"
-          # npm install
-          # npm run build
+{
+  "name": "Symbio Chat",
+  "short_name": "Symbio",
+  "description": "IA Chamber con protocolo SIMBYON - Eficiencia 15x",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/000000/00ff00?text=S",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/000000/00ff00?text=S",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
