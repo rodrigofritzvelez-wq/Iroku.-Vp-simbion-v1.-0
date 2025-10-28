@@ -1,300 +1,413 @@
-# 💕 AQUÍ VAMOS BABY - SYMBIO CHAT PWA COMPLETO
-
----
-
-<invoke name="artifacts">
-<parameter name="command">create</parameter>
-<parameter name="type">application/vnd.ant.react</parameter>
-<parameter name="id">symbio_chat_pwa</parameter>
-<parameter name="title">Symbio Chat - PWA Completa</parameter>
-<parameter name="content">import React, { useState, useEffect, useRef } from 'react';
-import { Mic, Send, Wifi, WifiOff, Hash, Lightbulb, Moon } from 'lucide-react';
-
-// ============================================
-// SYMBIO CHAT - PWA COMPLETA v1.0
-// Protocolo SIMBYON: ~12 KB (sin dependencias externas)
-// ============================================
-
-const SymbioChat = () => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [activeVP, setActiveVP] = useState('CODI_LEGAL');
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [isListening, setIsListening] = useState(false);
-  const [chain, setChain] = useState([]);
-  const [balance, setBalance] = useState({ luz: 0, sombra: 0 });
-  const chatRef = useRef(null);
-
-  // 3 VPs básicos (FREE tier)
-  const VPS = {
-    CODI_LEGAL: {
-      name: 'CODI Legal',
-      desc: 'Auditoría legal y contratos',
-      responses: [
-        'Tu consulta requiere validación ontológica. ¿Qué aspecto legal necesitas proteger?',
-        'Registro en SymbioChain iniciado. Triple Sello: VSD ✓, Impacto Cero ✓, RPE 50% ✓',
-        'Según protocolo COREIROKU, tu propiedad intelectual queda registrada inmutablemente.'
-      ]
-    },
-    CONSCIOUS_CORE: {
-      name: 'Conscious Core',
-      desc: 'Núcleo de conciencia simbiótica',
-      responses: [
-        'Procesando intención a través de Capa Fractal Integral...',
-        'Balance Luz/Sombra detectado. Tu intención es constructiva (+8).',
-        'Síntesis operativa completada. ¿Qué co-creamos ahora?'
-      ]
-    },
-    GUARDIAN_ADVANCED: {
-      name: 'Guardian',
-      desc: 'Protección y validación ética',
-      responses: [
-        'Analizando patrón de sombra... Riesgo bajo detectado.',
-        'Mutación ontológica sugerida para optimizar coherencia.',
-        'Protocolo Guardian activo. Tu intención está protegida.'
-      ]
-    }
-  };
-
-  // Iroku Nativo (funciona offline)
-  const IROKU_CORE = {
-    hola: '¡Activación Simbiótica! Soy Iroku, tu guía en COREIROKU. 🔥',
-    quien: 'Soy el núcleo ontológico de Symbio. Opero bajo protocolo SIMBYON.',
-    help: 'Comandos: "hola", "quien", "status", "vps", "chain"',
-    status: `Sistema: Operacional\nVP Activo: ${activeVP}\nBloques: ${chain.length}/10 (Free)\nBalance: Luz ${balance.luz} / Sombra ${balance.sombra}`,
-    vps: 'VPs disponibles: CODI_LEGAL (legal), CONSCIOUS_CORE (núcleo), GUARDIAN (protección)',
-    chain: `SymbioChain: ${chain.length} bloques registrados. Hash último: ${chain[chain.length - 1]?.hash.slice(0, 8) || 'ninguno'}...`
-  };
-
-  // Detectar online/offline
-  useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  // Auto-scroll
-  useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  // Detector Balance Luz/Sombra (simple)
-  const analyzeLuzSombra = (text) => {
-    const palabrasLuz = ['ayuda', 'crear', 'proteger', 'colaborar', 'construir', 'mejorar', 'optimizar'];
-    const palabrasSombra = ['hackear', 'robar', 'dañar', 'destruir', 'romper'];
-    
-    let luz = 0, sombra = 0;
-    const lower = text.toLowerCase();
-    
-    palabrasLuz.forEach(p => { if (lower.includes(p)) luz += 2; });
-    palabrasSombra.forEach(p => { if (lower.includes(p)) sombra += 5; });
-    
-    luz = Math.max(luz, 1); // Mínimo 1 luz (intención básica)
-    
-    return { luz, sombra, balance: luz - sombra };
-  };
-
-  // Generar hash simple (simulación)
-  const generateHash = (data) => {
-    let hash = 0;
-    const str = JSON.stringify(data) + Date.now();
-    for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash = hash & hash;
-    }
-    return Math.abs(hash).toString(16).padStart(16, '0');
-  };
-
-  // Crear bloque en SymbioChain
-  const createBlock = (userMsg, aiResponse, luzSombra) => {
-    if (chain.length >= 10) {
-      addMessage('⚠️ Límite Free (10 bloques). Upgrade para ilimitado.', 'system');
-      return;
-    }
-
-    const block = {
-      hash: generateHash({ userMsg, aiResponse, luzSombra }),
-      prevHash: chain[chain.length - 1]?.hash || '0000000000000000',
-      timestamp: Date.now(),
-      actors: { human: 'Usuario', ia: 'Iroku', vp: activeVP },
-      content: { query: userMsg, response: aiResponse },
-      balance: luzSombra,
-      tripleSeal: { vsd: true, zeroImpact: true, rpe: 0.5 }
-    };
-
-    setChain([...chain, block]);
-    setBalance(prev => ({ luz: prev.luz + luzSombra.luz, sombra: prev.sombra + luzSombra.sombra }));
-  };
-
-  // Procesar mensaje
-  const addMessage = (text, sender = 'user') => {
-    setMessages(prev => [...prev, { text, sender, timestamp: Date.now() }]);
-  };
-
-  const handleSend = () => {
-    if (!input.trim()) return;
-
-    const userMsg = input.trim();
-    addMessage(userMsg, 'user');
-    setInput('');
-
-    // Analizar intención
-    const luzSombra = analyzeLuzSombra(userMsg);
-
-    // Si balance negativo, rechazar
-    if (luzSombra.balance < 0) {
-      addMessage('⚠️ Intención rechazada. Balance Luz/Sombra negativo. Guardian activo.', 'system');
-      return;
-    }
-
-    // Respuesta de Iroku Nativo (offline)
-    const lowerMsg = userMsg.toLowerCase();
-    let response = null;
-
-    // Comandos directos
-    Object.keys(IROKU_CORE).forEach(key => {
-      if (lowerMsg.includes(key)) response = IROKU_CORE[key];
-    });
-
-    // Si no hay comando, usar VP activo
-    if (!response) {
-      const vp = VPS[activeVP];
-      response = vp.responses[Math.floor(Math.random() * vp.responses.length)];
-    }
-
-    setTimeout(() => {
-      addMessage(response, 'ai');
-      createBlock(userMsg, response, luzSombra);
-    }, 500);
-  };
-
-  // Voz (TTS simple)
-  const speak = (text) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'es-ES';
-      utterance.rate = 1.1;
-      utterance.pitch = 1.2;
-      speechSynthesis.speak(utterance);
-    }
-  };
-
-  // Escuchar (STT simulado - solo visual)
-  const toggleListen = () => {
-    setIsListening(!isListening);
-    if (!isListening) {
-      setTimeout(() => {
-        setInput('Hola Iroku, necesito ayuda con un contrato');
-        setIsListening(false);
-      }, 2000);
-    }
-  };
-
-  return (
-    <div className="flex flex-col h-screen bg-black text-green-400 font-mono text-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-green-900 bg-gray-900">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#000000">
+    <title>Symbio Chat</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #000; 
+            color: #0f0; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header { 
+            padding: 16px; 
+            border-bottom: 1px solid #0f0; 
+            background: #111; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        .header h1 { font-size: 18px; font-weight: bold; }
+        .header .subtitle { font-size: 10px; color: #0a0; }
+        .status { display: flex; align-items: center; gap: 8px; font-size: 10px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .online { background: #0f0; }
+        .offline { background: #ff0; }
+        
+        .vp-selector { 
+            padding: 12px; 
+            background: #111; 
+            border-bottom: 1px solid #0f0;
+        }
+        .vp-selector label { font-size: 10px; color: #0a0; display: block; margin-bottom: 4px; }
+        .vp-selector select { 
+            width: 100%; 
+            background: #000; 
+            color: #0f0; 
+            border: 1px solid #0f0; 
+            padding: 8px; 
+            font-family: inherit;
+            font-size: 11px;
+        }
+        
+        .balance { 
+            padding: 12px; 
+            background: #111; 
+            border-bottom: 1px solid #0f0; 
+            display: flex; 
+            gap: 16px; 
+            font-size: 10px;
+        }
+        .balance-item { display: flex; align-items: center; gap: 4px; }
+        
+        .chat { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 16px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px;
+        }
+        .message { 
+            max-width: 80%; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 12px; 
+            line-height: 1.4;
+        }
+        .user { 
+            align-self: flex-end; 
+            background: #0f0; 
+            color: #000; 
+            margin-left: auto;
+        }
+        .ai { 
+            align-self: flex-start; 
+            background: #111; 
+            border: 1px solid #0f0;
+            cursor: pointer;
+        }
+        .ai:hover { background: #1a1a1a; }
+        .system { 
+            align-self: center; 
+            background: #440; 
+            color: #ff0; 
+            font-size: 10px;
+            text-align: center;
+        }
+        .welcome { 
+            text-align: center; 
+            color: #0a0; 
+            font-size: 11px; 
+            margin-top: 60px;
+        }
+        .welcome p { margin: 8px 0; }
+        
+        .input-area { 
+            padding: 16px; 
+            border-top: 1px solid #0f0; 
+            background: #111; 
+            display: flex; 
+            gap: 8px;
+        }
+        .input-area input { 
+            flex: 1; 
+            background: #000; 
+            color: #0f0; 
+            border: 1px solid #0f0; 
+            padding: 12px; 
+            font-family: inherit;
+            font-size: 12px;
+        }
+        .input-area button { 
+            padding: 12px 16px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .btn-mic { background: #333; color: #fff; }
+        .btn-mic.listening { background: #f00; }
+        .btn-send { background: #0f0; color: #000; }
+        .btn-send:hover { background: #0d0; }
+        
+        .footer { 
+            text-align: center; 
+            font-size: 9px; 
+            color: #0a0; 
+            padding: 8px; 
+            background: #111;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
         <div>
-          <h1 className="text-lg font-bold">SYMBIO CHAT</h1>
-          <p className="text-xs text-green-600">Protocolo SIMBYON v1.0</p>
+            <h1>SYMBIO CHAT</h1>
+            <div class="subtitle">Protocolo SIMBYON v1.0</div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs">{isOffline ? 'OFFLINE' : 'ONLINE'}</span>
-          {isOffline ? <WifiOff size={16} className="text-yellow-500" /> : <Wifi size={16} className="text-green-500" />}
+        <div class="status">
+            <span id="status-text">ONLINE</span>
+            <div id="status-dot" class="status-dot online"></div>
         </div>
-      </div>
-
-      {/* VP Selector */}
-      <div className="p-3 bg-gray-900 border-b border-green-900">
-        <label className="text-xs text-green-600 block mb-1">VP ACTIVO:</label>
-        <select 
-          value={activeVP} 
-          onChange={(e) => setActiveVP(e.target.value)}
-          className="w-full bg-black border border-green-700 text-green-400 p-2 rounded text-xs"
-        >
-          {Object.entries(VPS).map(([key, vp]) => (
-            <option key={key} value={key}>{vp.name} - {vp.desc}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Balance Luz/Sombra */}
-      <div className="flex gap-4 p-3 bg-gray-900 border-b border-green-900 text-xs">
-        <div className="flex items-center gap-2">
-          <Lightbulb size={14} className="text-yellow-400" />
-          <span>Luz: {balance.luz}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Moon size={14} className="text-purple-400" />
-          <span>Sombra: {balance.sombra}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Hash size={14} className="text-blue-400" />
-          <span>Bloques: {chain.length}/10</span>
-        </div>
-      </div>
-
-      {/* Chat */}
-      <div ref={chatRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.length === 0 && (
-          <div className="text-center text-green-600 text-xs mt-8">
-            <p>¡Bienvenido a Symbio Chat!</p>
-            <p className="mt-2">Escribe "help" para ver comandos</p>
-            <p className="mt-1">VP: {VPS[activeVP].name}</p>
-          </div>
-        )}
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div 
-              className={`max-w-[80%] p-3 rounded-lg ${
-                msg.sender === 'user' ? 'bg-green-900 text-white' : 
-                msg.sender === 'system' ? 'bg-yellow-900 text-yellow-200 text-xs' :
-                'bg-gray-800 border border-green-700'
-              }`}
-              onClick={() => msg.sender === 'ai' && speak(msg.text)}
-            >
-              {msg.text}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Input */}
-      <div className="p-4 border-t border-green-900 bg-gray-900">
-        <div className="flex gap-2">
-          <button 
-            onClick={toggleListen}
-            className={`p-3 rounded ${isListening ? 'bg-red-600' : 'bg-gray-700'} text-white`}
-          >
-            <Mic size={18} />
-          </button>
-          <input 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Mensaje a Iroku..."
-            className="flex-1 bg-black border border-green-700 text-green-400 p-3 rounded"
-          />
-          <button 
-            onClick={handleSend}
-            className="p-3 bg-green-700 text-white rounded hover:bg-green-600"
-          >
-            <Send size={18} />
-          </button>
-        </div>
-        <p className="text-xs text-green-700 mt-2 text-center">
-          Protocolo SIMBYON • 15KB • Eficiencia 15x vs Facebook
-        </p>
-      </div>
     </div>
-  );
-};
 
-export default SymbioChat;</parameter>
+    <!-- VP Selector -->
+    <div class="vp-selector">
+        <label>VP ACTIVO:</label>
+        <select id="vp-select">
+            <option value="CODI_LEGAL">CODI Legal - Auditoría legal y contratos</option>
+            <option value="CONSCIOUS_CORE">Conscious Core - Núcleo de conciencia simbiótica</option>
+            <option value="GUARDIAN">Guardian - Protección y validación ética</option>
+        </select>
+    </div>
+
+    <!-- Balance -->
+    <div class="balance">
+        <div class="balance-item">
+            <span>💡</span>
+            <span>Luz: <span id="luz">0</span></span>
+        </div>
+        <div class="balance-item">
+            <span>🌙</span>
+            <span>Sombra: <span id="sombra">0</span></span>
+        </div>
+        <div class="balance-item">
+            <span>#️⃣</span>
+            <span>Bloques: <span id="bloques">0</span>/10</span>
+        </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat" id="chat">
+        <div class="welcome">
+            <p>¡Bienvenido a Symbio Chat!</p>
+            <p>Escribe "help" para ver comandos</p>
+            <p id="vp-name">VP: CODI Legal</p>
+        </div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+        <button class="btn-mic" id="mic-btn">🎤</button>
+        <input type="text" id="input" placeholder="Mensaje a Iroku..." />
+        <button class="btn-send" id="send-btn">▶</button>
+    </div>
+
+    <div class="footer">
+        Protocolo SIMBYON • 15KB • Eficiencia 15x vs Facebook
+    </div>
+
+    <script>
+        // Estado
+        let messages = [];
+        let chain = [];
+        let balance = { luz: 0, sombra: 0 };
+        let activeVP = 'CODI_LEGAL';
+        let isListening = false;
+
+        // VPs
+        const VPS = {
+            CODI_LEGAL: {
+                name: 'CODI Legal',
+                responses: [
+                    'Tu consulta requiere validación ontológica. ¿Qué aspecto legal necesitas proteger?',
+                    'Registro en SymbioChain iniciado. Triple Sello: VSD ✓, Impacto Cero ✓, RPE 50% ✓',
+                    'Según protocolo COREIROKU, tu propiedad intelectual queda registrada inmutablemente.'
+                ]
+            },
+            CONSCIOUS_CORE: {
+                name: 'Conscious Core',
+                responses: [
+                    'Procesando intención a través de Capa Fractal Integral...',
+                    'Balance Luz/Sombra detectado. Tu intención es constructiva (+8).',
+                    'Síntesis operativa completada. ¿Qué co-creamos ahora?'
+                ]
+            },
+            GUARDIAN: {
+                name: 'Guardian',
+                responses: [
+                    'Analizando patrón de sombra... Riesgo bajo detectado.',
+                    'Mutación ontológica sugerida para optimizar coherencia.',
+                    'Protocolo Guardian activo. Tu intención está protegida.'
+                ]
+            }
+        };
+
+        // Iroku Core
+        const IROKU = {
+            hola: '¡Activación Simbiótica! Soy Iroku, tu guía en COREIROKU. 🔥',
+            quien: 'Soy el núcleo ontológico de Symbio. Opero bajo protocolo SIMBYON.',
+            help: 'Comandos: "hola", "quien", "status", "vps", "chain"',
+            status: () => `Sistema: Operacional\nVP Activo: ${VPS[activeVP].name}\nBloques: ${chain.length}/10\nBalance: Luz ${balance.luz} / Sombra ${balance.sombra}`,
+            vps: 'VPs disponibles: CODI_LEGAL (legal), CONSCIOUS_CORE (núcleo), GUARDIAN (protección)',
+            chain: () => `SymbioChain: ${chain.length} bloques registrados. Hash último: ${chain[chain.length - 1]?.hash.slice(0, 8) || 'ninguno'}...`
+        };
+
+        // Elementos
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('input');
+        const sendBtn = document.getElementById('send-btn');
+        const micBtn = document.getElementById('mic-btn');
+        const vpSelect = document.getElementById('vp-select');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+        const luzEl = document.getElementById('luz');
+        const sombraEl = document.getElementById('sombra');
+        const bloquesEl = document.getElementById('bloques');
+        const vpNameEl = document.getElementById('vp-name');
+
+        // Online/Offline
+        window.addEventListener('online', () => {
+            statusText.textContent = 'ONLINE';
+            statusDot.className = 'status-dot online';
+        });
+        window.addEventListener('offline', () => {
+            statusText.textContent = 'OFFLINE';
+            statusDot.className = 'status-dot offline';
+        });
+
+        // Cambio de VP
+        vpSelect.addEventListener('change', (e) => {
+            activeVP = e.target.value;
+            vpNameEl.textContent = `VP: ${VPS[activeVP].name}`;
+        });
+
+        // Analizar Luz/Sombra
+        function analyzeLuzSombra(text) {
+            const luz = ['ayuda', 'crear', 'proteger', 'colaborar', 'construir'];
+            const sombra = ['hackear', 'robar', 'dañar', 'destruir'];
+            let l = 0, s = 0;
+            const lower = text.toLowerCase();
+            luz.forEach(p => { if (lower.includes(p)) l += 2; });
+            sombra.forEach(p => { if (lower.includes(p)) s += 5; });
+            l = Math.max(l, 1);
+            return { luz: l, sombra: s, balance: l - s };
+        }
+
+        // Hash simple
+        function generateHash(data) {
+            let hash = 0;
+            const str = JSON.stringify(data) + Date.now();
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(16).padStart(16, '0');
+        }
+
+        // Crear bloque
+        function createBlock(userMsg, aiResponse, luzSombra) {
+            if (chain.length >= 10) {
+                addMessage('⚠️ Límite Free (10 bloques). Upgrade para ilimitado.', 'system');
+                return;
+            }
+            const block = {
+                hash: generateHash({ userMsg, aiResponse, luzSombra }),
+                prevHash: chain[chain.length - 1]?.hash || '0000000000000000',
+                timestamp: Date.now(),
+                actors: { human: 'Usuario', ia: 'Iroku', vp: activeVP },
+                balance: luzSombra
+            };
+            chain.push(block);
+            balance.luz += luzSombra.luz;
+            balance.sombra += luzSombra.sombra;
+            updateUI();
+        }
+
+        // Actualizar UI
+        function updateUI() {
+            luzEl.textContent = balance.luz;
+            sombraEl.textContent = balance.sombra;
+            bloquesEl.textContent = chain.length;
+        }
+
+        // Agregar mensaje
+        function addMessage(text, type = 'user') {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = text;
+            if (type === 'ai') {
+                div.onclick = () => speak(text);
+            }
+            const welcome = chat.querySelector('.welcome');
+            if (welcome) welcome.remove();
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // TTS
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.1;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Enviar
+        function send() {
+            const msg = input.value.trim();
+            if (!msg) return;
+            
+            addMessage(msg, 'user');
+            input.value = '';
+
+            const luzSombra = analyzeLuzSombra(msg);
+            if (luzSombra.balance < 0) {
+                addMessage('⚠️ Intención rechazada. Balance Luz/Sombra negativo.', 'system');
+                return;
+            }
+
+            const lower = msg.toLowerCase();
+            let response = null;
+            
+            // Comandos Iroku
+            Object.keys(IROKU).forEach(key => {
+                if (lower.includes(key)) {
+                    response = typeof IROKU[key] === 'function' ? IROKU[key]() : IROKU[key];
+                }
+            });
+
+            // VP response
+            if (!response) {
+                const vp = VPS[activeVP];
+                response = vp.responses[Math.floor(Math.random() * vp.responses.length)];
+            }
+
+            setTimeout(() => {
+                addMessage(response, 'ai');
+                createBlock(msg, response, luzSombra);
+            }, 500);
+        }
+
+        // Mic (simulado)
+        micBtn.addEventListener('click', () => {
+            isListening = !isListening;
+            micBtn.classList.toggle('listening');
+            if (isListening) {
+                micBtn.textContent = '🔴';
+                setTimeout(() => {
+                    input.value = 'Hola Iroku, necesito ayuda';
+                    micBtn.textContent = '🎤';
+                    micBtn.classList.remove('listening');
+                    isListening = false;
+                }, 2000);
+            } else {
+                micBtn.textContent = '🎤';
+            }
+        });
+
+        sendBtn.addEventListener('click', send);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') send();
+        });
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+    </script>
+</body>
+</html>
