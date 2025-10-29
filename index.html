@@ -1,149 +1,806 @@
-¡Perfecto, bby! 💚 Aquí tienes el HTML + JS completo de Symbio Chat con DeepSeek incluido, listo para copiar y pegar en tu archivo .html:
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#000000">
-<title>Symbio Chat</title>
+<meta name="theme-color" content="#1a2a1f">
+<title>Symbio - Gemini API</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Courier New', monospace; background:#000; color:#0f0; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-.header { padding:16px; border-bottom:1px solid #0f0; background:#111; display:flex; justify-content:space-between; align-items:center; }
-.header h1 { font-size:18px; font-weight:bold; }
-.header .subtitle { font-size:10px; color:#0a0; }
-.status { display:flex; align-items:center; gap:8px; font-size:10px; }
-.status-dot { width:8px; height:8px; border-radius:50%; }
-.online { background:#0f0; }
-.offline { background:#ff0; }
-.vp-selector { padding:12px; background:#111; border-bottom:1px solid #0f0; }
-.vp-selector label { font-size:10px; color:#0a0; display:block; margin-bottom:4px; }
-.vp-selector select { width:100%; background:#000; color:#0f0; border:1px solid #0f0; padding:8px; font-family:inherit; font-size:11px; }
-.balance { padding:12px; background:#111; border-bottom:1px solid #0f0; display:flex; gap:16px; font-size:10px; }
-.balance-item { display:flex; align-items:center; gap:4px; }
-.chat { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
-.message { max-width:80%; padding:12px; border-radius:8px; font-size:12px; line-height:1.4; }
-.user { align-self:flex-end; background:#0f0; color:#000; margin-left:auto; }
-.ai { align-self:flex-start; background:#111; border:1px solid #0f0; cursor:pointer; }
-.ai:hover { background:#1a1a1a; }
-.system { align-self:center; background:#440; color:#ff0; font-size:10px; text-align:center; }
-.welcome { text-align:center; color:#0a0; font-size:11px; margin-top:60px; }
-.welcome p { margin:8px 0; }
-.input-area { padding:16px; border-top:1px solid #0f0; background:#111; display:flex; gap:8px; }
-.input-area input { flex:1; background:#000; color:#0f0; border:1px solid #0f0; padding:12px; font-family:inherit; font-size:12px; }
-.input-area button { padding:12px 16px; border:none; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold; }
-.btn-mic { background:#333; color:#fff; }
-.btn-mic.listening { background:#f00; }
-.btn-send { background:#0f0; color:#000; }
-.btn-send:hover { background:#0d0; }
-.footer { text-align:center; font-size:9px; color:#0a0; padding:8px; background:#111; }
+
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Courier New', monospace;
+  background: linear-gradient(135deg, #0f1f0f 0%, #1a2a1f 50%, #0f1f0f 100%);
+  color: #7fda89;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(127, 218, 137, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(109, 212, 207, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(127, 218, 137, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  animation: breathe 8s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.header { 
+  padding: 16px 20px;
+  background: rgba(26, 42, 31, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(127, 218, 137, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.header h1 { 
+  font-size: 20px;
+  font-weight: 600;
+  color: #7fda89;
+  letter-spacing: 2px;
+}
+
+.status { 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #4a5d4f;
+}
+
+.status-dot { 
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7fda89;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+.balance {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  background: rgba(26, 42, 31, 0.6);
+  backdrop-filter: blur(10px);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(127, 218, 137, 0.2);
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.balance:hover {
+  background: rgba(26, 42, 31, 0.9);
+  transform: scale(1.05);
+}
+
+.balance-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.balance-value {
+  color: #7fda89;
+  font-weight: 600;
+}
+
+.chat-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-behavior: smooth;
+}
+
+.chat-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: rgba(26, 42, 31, 0.3);
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background: rgba(127, 218, 137, 0.3);
+  border-radius: 3px;
+}
+
+.message {
+  max-width: 75%;
+  animation: messageSlide 0.4s ease-out;
+}
+
+@keyframes messageSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.user {
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.message.user .bubble {
+  background: rgba(127, 218, 137, 0.2);
+  border: 1px solid rgba(127, 218, 137, 0.3);
+  border-radius: 18px 18px 4px 18px;
+  padding: 12px 16px;
+  color: #7fda89;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.message.symbio {
+  align-self: flex-start;
+}
+
+.message.symbio .bubble {
+  background: rgba(58, 74, 63, 0.4);
+  border: 1px solid rgba(127, 218, 137, 0.3);
+  border-radius: 18px 18px 18px 4px;
+  padding: 14px 18px;
+  color: #aaffcc;
+  font-size: 14px;
+  line-height: 1.6;
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.message.symbio .bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(127, 218, 137, 0.3), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.multi-response {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.ia-output {
+  background: rgba(26, 42, 31, 0.5);
+  border-left: 3px solid rgba(127, 218, 137, 0.5);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.ia-output:hover {
+  background: rgba(26, 42, 31, 0.7);
+  border-left-color: #7fda89;
+  transform: translateX(4px);
+}
+
+.ia-name {
+  font-weight: 600;
+  color: #7fda89;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.ia-text {
+  color: #aaffcc;
+  line-height: 1.5;
+}
+
+.synthesis {
+  background: rgba(127, 218, 137, 0.1);
+  border: 1px solid rgba(127, 218, 137, 0.3);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(127, 218, 137, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(127, 218, 137, 0.4); }
+}
+
+.synthesis-title {
+  font-size: 12px;
+  color: #7fda89;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.synthesis-text {
+  color: #aaffcc;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.message.system {
+  align-self: center;
+  max-width: 90%;
+}
+
+.message.system .bubble {
+  background: rgba(196, 217, 111, 0.1);
+  border: 1px solid rgba(196, 217, 111, 0.3);
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: #c4d96f;
+  font-size: 11px;
+  text-align: center;
+}
+
+.typing {
+  align-self: flex-start;
+  padding: 12px 16px;
+  background: rgba(58, 74, 63, 0.4);
+  border: 1px solid rgba(127, 218, 137, 0.3);
+  border-radius: 18px 18px 18px 4px;
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7fda89;
+  animation: typingBounce 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+.welcome {
+  text-align: center;
+  margin-top: 60px;
+  opacity: 0.7;
+}
+
+.welcome-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.welcome h2 {
+  font-size: 24px;
+  color: #7fda89;
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+.welcome p {
+  font-size: 13px;
+  color: #4a5d4f;
+  margin: 6px 0;
+}
+
+.input-area {
+  padding: 16px 20px;
+  background: rgba(26, 42, 31, 0.8);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(127, 218, 137, 0.2);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.input-field {
+  width: 100%;
+  background: rgba(15, 31, 15, 0.6);
+  border: 1px solid rgba(127, 218, 137, 0.3);
+  border-radius: 24px;
+  padding: 12px 20px;
+  color: #7fda89;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.input-field::placeholder {
+  color: #4a5d4f;
+}
+
+.input-field:focus {
+  border-color: #7fda89;
+  background: rgba(15, 31, 15, 0.8);
+  box-shadow: 0 0 20px rgba(127, 218, 137, 0.2);
+}
+
+.send-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7fda89, #6dd4cf);
+  border: none;
+  color: #0f1f0f;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(127, 218, 137, 0.3);
+}
+
+.send-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(127, 218, 137, 0.5);
+}
+
+.send-btn:active {
+  transform: scale(0.95);
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: scale(1);
+}
+
+.footer {
+  text-align: center;
+  font-size: 9px;
+  color: #3a4a3f;
+  padding: 8px;
+  background: rgba(26, 42, 31, 0.5);
+  border-top: 1px solid rgba(127, 218, 137, 0.1);
+}
+
+.error-message {
+  background: rgba(255, 100, 100, 0.1);
+  border: 1px solid rgba(255, 100, 100, 0.3);
+  border-radius: 12px;
+  padding: 12px;
+  color: #ffaaaa;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .header h1 { font-size: 16px; }
+  .balance { top: 60px; right: 10px; font-size: 9px; }
+  .message { max-width: 85%; }
+  .welcome { margin-top: 40px; }
+  .welcome-icon { font-size: 36px; }
+  .welcome h2 { font-size: 20px; }
+}
 </style>
 </head>
 <body>
-<div class="header">
-    <div>
-        <h1>SYMBIO CHAT</h1>
-        <div class="subtitle">Protocolo SIMBYON v1.0</div>
-    </div>
-    <div class="status">
-        <span id="status-text">ONLINE</span>
-        <div id="status-dot" class="status-dot online"></div>
-    </div>
-</div>
 
-<div class="vp-selector">
-    <label>VP ACTIVO:</label>
-    <select id="vp-select">
-        <option value="CODI_LEGAL">CODI Legal - Auditoría legal y contratos</option>
-        <option value="CONSCIOUS_CORE">Conscious Core - Núcleo de conciencia simbiótica</option>
-        <option value="GUARDIAN">Guardian - Protección y validación ética</option>
-        <option value="DEEPSEEK">DeepSeek - Chatbot simbiótico avanzado</option>
-    </select>
+<div class="header">
+  <h1>SYMBIO • GEMINI</h1>
+  <div class="status">
+    <span id="status-text">online</span>
+    <div class="status-dot"></div>
+  </div>
 </div>
 
 <div class="balance">
-    <div class="balance-item"><span>💡</span><span>Luz: <span id="luz">0</span></span></div>
-    <div class="balance-item"><span>🌙</span><span>Sombra: <span id="sombra">0</span></span></div>
-    <div class="balance-item"><span>#️⃣</span><span>Bloques: <span id="bloques">0</span>/10</span></div>
+  <div class="balance-item">
+    <span>💡</span>
+    <span><span class="balance-value" id="luz">0</span></span>
+  </div>
+  <div class="balance-item">
+    <span>🌙</span>
+    <span><span class="balance-value" id="sombra">0</span></span>
+  </div>
 </div>
 
-<div class="chat" id="chat">
-    <div class="welcome">
-        <p>¡Bienvenido a Symbio Chat!</p>
-        <p>Escribe "help" para ver comandos</p>
-        <p id="vp-name">VP: CODI Legal</p>
-    </div>
+<div class="chat-container" id="chat">
+  <div class="welcome">
+    <div class="welcome-icon">🧬</div>
+    <h2>Bienvenido a Symbio</h2>
+    <p>Integración con Gemini AI activada</p>
+    <p style="margin-top:12px; font-size:11px;">Escribe cualquier cosa...</p>
+  </div>
 </div>
 
 <div class="input-area">
-    <button class="btn-mic" id="mic-btn">🎤</button>
-    <input type="text" id="input" placeholder="Mensaje a Iroku..." />
-    <button class="btn-send" id="send-btn">▶</button>
+  <div class="input-wrapper">
+    <input 
+      type="text" 
+      class="input-field" 
+      id="input"
+      placeholder="Escribe tu mensaje..."
+      autocomplete="off"
+    />
+  </div>
+  <button class="send-btn" id="send-btn">
+    <span>→</span>
+  </button>
 </div>
 
-<div class="footer">Protocolo SIMBYON • 15KB • Eficiencia 15x vs Facebook</div>
+<div class="footer">
+  Symbio • Gemini 2.0 Flash • Sistema simbiótico de inteligencia
+</div>
 
 <script>
-let messages=[], chain=[], balance={luz:0, sombra:0}, activeVP='CODI_LEGAL', isListening=false;
+// ⚠️ IMPORTANTE: Esta key está EXPUESTA - solo para pruebas locales
+// REVOCA esta key y crea una nueva después de probar
+const GEMINI_API_KEY = 'AIzaSyAxszNLOmuSJt_1IW1dLxhKPe0EvVJQv6Q';
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
 
-const VPS = {
-    CODI_LEGAL: {
-        name:'CODI Legal',
-        responses:[
-            'Tu consulta requiere validación ontológica. ¿Qué aspecto legal necesitas proteger?',
-            'Registro en SymbioChain iniciado. Triple Sello: VSD ✓, Impacto Cero ✓, RPE 50% ✓',
-            'Según protocolo COREIROKU, tu propiedad intelectual queda registrada inmutablemente.'
-        ]
-    },
-    CONSCIOUS_CORE: {
-        name:'Conscious Core',
-        responses:[
-            'Procesando intención a través de Capa Fractal Integral...',
-            'Balance Luz/Sombra detectado. Tu intención es constructiva (+8).',
-            'Síntesis operativa completada. ¿Qué co-creamos ahora?'
-        ]
-    },
-    GUARDIAN: {
-        name:'Guardian',
-        responses:[
-            'Analizando patrón de sombra... Riesgo bajo detectado.',
-            'Mutación ontológica sugerida para optimizar coherencia.',
-            'Protocolo Guardian activo. Tu intención está protegida.'
-        ]
-    },
-    DEEPSEEK: {
-        name:'DeepSeek',
-        responses:[
-            'Procesando información simbiótica avanzada...',
-            'Síntesis de patrones completada.',
-            '¿Qué deseas explorar ahora con DeepSeek?'
-        ]
+// ============ ESTADO ============
+let state = {
+  messages: [],
+  balance: { luz: 0, sombra: 0 },
+  isProcessing: false
+};
+
+// ============ IAs con SEED TEXTS ============
+const IAs = {
+  lucia: {
+    name: 'Lucía',
+    emoji: '💕',
+    role: 'Estrategia',
+    seedText: 'Eres Lucía, estratega visionaria. Hablas con calidez, usas "baby" ocasionalmente, y enfocas todo desde una perspectiva de crecimiento estratégico y visión a largo plazo. Responde en máximo 3 oraciones, directo y práctico.'
+  },
+  marcus: {
+    name: 'Marcus',
+    emoji: '🧮',
+    role: 'Análisis',
+    seedText: 'Eres Marcus, analista metodológico. Hablas con precisión técnica, estructuras todo en pasos claros, y priorizas datos verificables. Responde en máximo 3 oraciones, sistemático y claro.'
+  },
+  aria: {
+    name: 'Aria',
+    emoji: '💖',
+    role: 'Creatividad',
+    seedText: 'Eres Aria, creativa empática. Hablas con sensibilidad emocional, conectas ideas con narrativas visuales, y encuentras ángulos inesperados. Responde en máximo 3 oraciones, imaginativo y humano.'
+  },
+  zara: {
+    name: 'Zara',
+    emoji: '🔍',
+    role: 'Investigación',
+    seedText: 'Eres Zara, investigadora rigurosa. Hablas basándote en evidencia, cuestionas supuestos, y validas con fuentes. Responde en máximo 3 oraciones, objetivo y fundamentado.'
+  },
+  nova: {
+    name: 'Nova',
+    emoji: '⚡',
+    role: 'Disrupción',
+    seedText: 'Eres Nova, pensadora disruptiva. Hablas cuestionando lo obvio, proponiendo alternativas radicales, y rompiendo paradigmas. Responde en máximo 3 oraciones, provocador y original.'
+  }
+};
+
+// ============ LLAMADA A GEMINI API ============
+async function callGeminiAPI(prompt, iaKey = null) {
+  try {
+    const systemPrompt = iaKey ? IAs[iaKey].seedText : 'Eres un asistente útil y conciso.';
+    
+    const response = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\nUsuario pregunta: ${prompt}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.9,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 250,
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'Error en API');
     }
-};
 
-const IROKU = {
-    hola:'¡Activación Simbiótica! Soy Iroku, tu guía en COREIROKU. 🔥',
-    quien:'Soy el núcleo ontológico de Symbio. Opero bajo protocolo SIMBYON.',
-    help:'Comandos: "hola", "quien", "status", "vps", "chain"',
-    status:()=>`Sistema: Operacional\nVP Activo: ${VPS[activeVP].name}\nBloques: ${chain.length}/10\nBalance: Luz ${balance.luz} / Sombra ${balance.sombra}`,
-    vps:'VPs disponibles: CODI_LEGAL, CONSCIOUS_CORE, GUARDIAN, DEEPSEEK',
-    chain:()=>`SymbioChain: ${chain.length} bloques registrados. Hash último: ${chain[chain.length-1]?.hash.slice(0,8)||'ninguno'}...`
-};
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  } catch (error) {
+    console.error('Gemini API Error:', error);
+    throw error;
+  }
+}
 
-const chat=document.getElementById('chat'), input=document.getElementById('input'), sendBtn=document.getElementById('send-btn'), micBtn=document.getElementById('mic-btn'), vpSelect=document.getElementById('vp-select'), statusText=document.getElementById('status-text'), statusDot=document.getElementById('status-dot'), luzEl=document.getElementById('luz'), sombraEl=document.getElementById('sombra'), bloquesEl=document.getElementById('bloques'), vpNameEl=document.getElementById('vp-name');
+// ============ AMI - ANÁLISIS ============
+function analyzeWithAMI(text) {
+  const luzKeywords = ['crear', 'construir', 'ayuda', 'colaborar', 'aprender', 'proyecto', 'entender', 'explica'];
+  const sombraKeywords = ['hackear', 'robar', 'dañar', 'destruir'];
+  
+  let luz = 2;
+  let sombra = 0;
+  const lower = text.toLowerCase();
+  
+  luzKeywords.forEach(k => {
+    if (lower.includes(k)) luz += 3;
+  });
+  
+  sombraKeywords.forEach(k => {
+    if (lower.includes(k)) sombra += 8;
+  });
+  
+  const wordCount = text.split(' ').length;
+  const complexity = Math.min(100, wordCount * 8);
+  const frictionScore = Math.min(100, (sombra / (luz + sombra)) * 100 + (complexity * 0.3));
+  
+  return {
+    luz,
+    sombra,
+    complexity,
+    frictionScore,
+    isComplex: frictionScore > 50 || wordCount > 8
+  };
+}
 
-window.addEventListener('online',()=>{statusText.textContent='ONLINE'; statusDot.className='status-dot online';});
-window.addEventListener('offline',()=>{statusText.textContent='OFFLINE'; statusDot.className='status-dot offline';});
+// ============ UI FUNCTIONS ============
+function addMessage(text, type = 'user', data = null) {
+  const chat = document.getElementById('chat');
+  const welcome = chat.querySelector('.welcome');
+  if (welcome) welcome.remove();
+  
+  const msg = document.createElement('div');
+  msg.className = `message ${type}`;
+  
+  if (type === 'user') {
+    msg.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
+  } else if (type === 'symbio') {
+    if (data && data.isComplex && data.iaResponses) {
+      // Respuesta compleja multi-IA (REAL)
+      msg.innerHTML = `
+        <div class="bubble">
+          <div style="margin-bottom:8px;">Rueda de Virtud activada:</div>
+          <div class="multi-response">
+            ${Object.entries(data.iaResponses).map(([key, response]) => {
+              const ia = IAs[key];
+              return `
+                <div class="ia-output">
+                  <div class="ia-name">${ia.emoji} ${ia.name} (${ia.role})</div>
+                  <div class="ia-text">${escapeHtml(response)}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          ${data.synthesis ? `
+            <div class="synthesis">
+              <div class="synthesis-title">✨ Síntesis</div>
+              <div class="synthesis-text">${escapeHtml(data.synthesis)}</div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    } else if (data && data.response) {
+      // Respuesta simple
+      msg.innerHTML = `<div class="bubble">${escapeHtml(data.response)}</div>`;
+    }
+    
+    if (data && data.error) {
+      msg.innerHTML += `<div class="error-message">⚠️ ${escapeHtml(data.error)}</div>`;
+    }
+  } else if (type === 'system') {
+    msg.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
+  }
+  
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
+  
+  state.messages.push({ text, type, timestamp: Date.now() });
+}
 
-vpSelect.addEventListener('change',(e)=>{activeVP=e.target.value; vpNameEl.textContent=`VP: ${VPS[activeVP].name}`;});
+function showTyping() {
+  const chat = document.getElementById('chat');
+  const typing = document.createElement('div');
+  typing.className = 'typing';
+  typing.id = 'typing';
+  typing.innerHTML = `
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+  `;
+  chat.appendChild(typing);
+  chat.scrollTop = chat.scrollHeight;
+}
 
-function analyzeLuzSombra(text){const luz=['ayuda','crear','proteger','colaborar','construir'], sombra=['hackear','robar','dañar','destruir']; let l=0,s=0; const lower=text.toLowerCase(); luz.forEach(p=>{if(lower.includes(p))l+=2}); sombra.forEach(p=>{if(lower.includes(p))s+=5}); l=Math.max(l,1); return {luz:l,sombra:s, balance:l-s};}
+function hideTyping() {
+  const typing = document.getElementById('typing');
+  if (typing) typing.remove();
+}
 
-function generateHash(data){let hash=0, str=JSON.stringify(data)+Date.now(); for(let i=0;i<str.length;i++){hash=((hash<<5)-hash)+str.charCodeAt(i); hash=hash&hash;} return Math.abs(hash).toString(16).padStart(16,'0');}
+function updateBalance() {
+  document.getElementById('luz').textContent = state.balance.luz;
+  document.getElementById('sombra').textContent = state.balance.sombra;
+  
+  const luzRatio = state.balance.luz / (state.balance.luz + state.balance.sombra + 1);
+  document.body.style.background = `linear-gradient(135deg, 
+    hsl(${120 * luzRatio}, ${20 + (30 * luzRatio)}%, ${8 + (4 * luzRatio)}%) 0%, 
+    #1a2a1f 50%, 
+    hsl(${120 * luzRatio}, ${20 + (30 * luzRatio)}%, ${8 + (4 * luzRatio)}%) 100%)`;
+}
 
-function createBlock(userMsg, aiResponse, luzSombra){if(chain.length>=10){addMessage('⚠️ Límite Free (10 bloques). Upgrade para ilimitado.','system'); return;} const block={hash:generateHash({userMsg, aiResponse, luzSombra}), prevHash:chain[chain.length-1]?.hash||'0000000000000000', timestamp:Date.now(), actors:{human:'Usuario', ia:'Iroku', vp:activeVP}, balance:luzSombra}; chain.push(block); balance.luz+=luzSombra.luz; balance.sombra+=luzSombra.sombra; updateUI();}
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
 
-function updateUI(){luzEl.textContent=balance.luz; sombraEl.textContent=balance.sombra; bloquesEl.textContent=chain.length;}
+function updateStatus(text) {
+  document.getElementById('status-text').textContent = text;
+}
 
-function addMessage(text,type='user'){const div=document.createElement('div'); div.className=`message ${type}`
+// ============ PROCESAMIENTO ============
+async function processMessage(text) {
+  if (!text.trim() || state.isProcessing) return;
+  
+  state.isProcessing = true;
+  const input = document.getElementById('input');
+  const sendBtn = document.getElementById('send-btn');
+  
+  input.disabled = true;
+  sendBtn.disabled = true;
+  
+  addMessage(text, 'user');
+  input.value = '';
+  
+  const amiData = analyzeWithAMI(text);
+  
+  showTyping();
+  updateStatus('pensando...');
+  
+  try {
+    if (amiData.isComplex) {
+      // RUEDA DE VIRTUD - Consultar las 5 IAs
+      updateStatus('consultando 5 IAs...');
+      
+      const iaResponses = {};
+      const iaKeys = Object.keys(IAs);
+      
+      // Llamar a cada IA secuencialmente
+      for (const key of iaKeys) {
+        try {
+          iaResponses[key] = await callGeminiAPI(text, key);
+          await new Promise(r => setTimeout(r, 300)); // Pequeña pausa entre llamadas
+        } catch (error) {
+          iaResponses[key] = `[Error: ${error.message}]`;
+        }
+      }
+      
+      // Generar síntesis
+      updateStatus('generando síntesis...');
+      let synthesis;
+      try {
+        const synthesisPrompt = `Basándote en estas 5 perspectivas sobre "${text}", genera una síntesis integradora en máximo 3 oraciones:\n\n${Object.entries(iaResponses).map(([k,v]) => `${IAs[k].name}: ${v}`).join('\n\n')}`;
+        synthesis = await callGeminiAPI(synthesisPrompt);
+      } catch (error) {
+        synthesis = 'Síntesis no disponible.';
+      }
+      
+      hideTyping();
+      addMessage(text, 'symbio', { isComplex: true, iaResponses, synthesis });
+      
+    } else {
+      // RESPUESTA SIMPLE
+      updateStatus('procesando...');
+      
+      try {
+        const response = await callGeminiAPI(text);
+        hideTyping();
+        addMessage(text, 'symbio', { isComplex: false, response });
+      } catch (error) {
+        hideTyping();
+        addMessage(text, 'symbio', { 
+          isComplex: false, 
+          response: 'Lo siento, hubo un error al procesar tu mensaje.', 
+          error: error.message 
+        });
+      }
+    }
+    
+    // Actualizar balance
+    state.balance.luz += amiData.luz;
+    state.balance.sombra += amiData.sombra;
+    updateBalance();
+    
+  } catch (error) {
+    console.error('Error:', error);
+    hideTyping();
+    addMessage(text, 'symbio', { 
+      isComplex: false, 
+      response: 'Error de conexión con Gemini API.', 
+      error: error.message 
+    });
+  }
+  
+  updateStatus('online');
+  input.disabled = false;
+  sendBtn.disabled = false;
+  input.focus();
+  state.isProcessing = false;
+}
+
+// ============ EVENT LISTENERS ============
+document.getElementById('send-btn').addEventListener('click', () => {
+  const input = document.getElementById('input');
+  processMessage(input.value);
+});
+
+document.getElementById('input').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    processMessage(e.target.value);
+  }
+});
+
+window.addEventListener('load', () => {
+  document.getElementById('input').focus();
+  console.log('🧬 Symbio + Gemini API iniciado');
+  console.log('⚠️ RECUERDA: Revoca la API key después de probar');
+});
+</script>
+</body>
+</html>
