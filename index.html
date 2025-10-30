@@ -2,805 +2,106 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1a2a1f">
-<title>Symbio - Gemini API</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-
-body { 
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Courier New', monospace;
-  background: linear-gradient(135deg, #0f1f0f 0%, #1a2a1f 50%, #0f1f0f 100%);
-  color: #7fda89;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-}
-
-body::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(127, 218, 137, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(109, 212, 207, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 40% 80%, rgba(127, 218, 137, 0.02) 0%, transparent 50%);
-  pointer-events: none;
-  animation: breathe 8s ease-in-out infinite;
-}
-
-@keyframes breathe {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
-}
-
-.header { 
-  padding: 16px 20px;
-  background: rgba(26, 42, 31, 0.8);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(127, 218, 137, 0.2);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 10;
-}
-
-.header h1 { 
-  font-size: 20px;
-  font-weight: 600;
-  color: #7fda89;
-  letter-spacing: 2px;
-}
-
-.status { 
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  color: #4a5d4f;
-}
-
-.status-dot { 
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #7fda89;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.9); }
-}
-
-.balance {
-  position: absolute;
-  top: 70px;
-  right: 20px;
-  background: rgba(26, 42, 31, 0.6);
-  backdrop-filter: blur(10px);
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(127, 218, 137, 0.2);
-  font-size: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  z-index: 10;
-  transition: all 0.3s ease;
-}
-
-.balance:hover {
-  background: rgba(26, 42, 31, 0.9);
-  transform: scale(1.05);
-}
-
-.balance-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.balance-value {
-  color: #7fda89;
-  font-weight: 600;
-}
-
-.chat-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  scroll-behavior: smooth;
-}
-
-.chat-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.chat-container::-webkit-scrollbar-track {
-  background: rgba(26, 42, 31, 0.3);
-}
-
-.chat-container::-webkit-scrollbar-thumb {
-  background: rgba(127, 218, 137, 0.3);
-  border-radius: 3px;
-}
-
-.message {
-  max-width: 75%;
-  animation: messageSlide 0.4s ease-out;
-}
-
-@keyframes messageSlide {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.message.user {
-  align-self: flex-end;
-  margin-left: auto;
-}
-
-.message.user .bubble {
-  background: rgba(127, 218, 137, 0.2);
-  border: 1px solid rgba(127, 218, 137, 0.3);
-  border-radius: 18px 18px 4px 18px;
-  padding: 12px 16px;
-  color: #7fda89;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.message.symbio {
-  align-self: flex-start;
-}
-
-.message.symbio .bubble {
-  background: rgba(58, 74, 63, 0.4);
-  border: 1px solid rgba(127, 218, 137, 0.3);
-  border-radius: 18px 18px 18px 4px;
-  padding: 14px 18px;
-  color: #aaffcc;
-  font-size: 14px;
-  line-height: 1.6;
-  backdrop-filter: blur(10px);
-  position: relative;
-}
-
-.message.symbio .bubble::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(127, 218, 137, 0.3), transparent);
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
-}
-
-.multi-response {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.ia-output {
-  background: rgba(26, 42, 31, 0.5);
-  border-left: 3px solid rgba(127, 218, 137, 0.5);
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  transition: all 0.3s ease;
-}
-
-.ia-output:hover {
-  background: rgba(26, 42, 31, 0.7);
-  border-left-color: #7fda89;
-  transform: translateX(4px);
-}
-
-.ia-name {
-  font-weight: 600;
-  color: #7fda89;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-}
-
-.ia-text {
-  color: #aaffcc;
-  line-height: 1.5;
-}
-
-.synthesis {
-  background: rgba(127, 218, 137, 0.1);
-  border: 1px solid rgba(127, 218, 137, 0.3);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-top: 8px;
-  animation: glow 2s ease-in-out infinite;
-}
-
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(127, 218, 137, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(127, 218, 137, 0.4); }
-}
-
-.synthesis-title {
-  font-size: 12px;
-  color: #7fda89;
-  font-weight: 600;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.synthesis-text {
-  color: #aaffcc;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.message.system {
-  align-self: center;
-  max-width: 90%;
-}
-
-.message.system .bubble {
-  background: rgba(196, 217, 111, 0.1);
-  border: 1px solid rgba(196, 217, 111, 0.3);
-  border-radius: 12px;
-  padding: 8px 12px;
-  color: #c4d96f;
-  font-size: 11px;
-  text-align: center;
-}
-
-.typing {
-  align-self: flex-start;
-  padding: 12px 16px;
-  background: rgba(58, 74, 63, 0.4);
-  border: 1px solid rgba(127, 218, 137, 0.3);
-  border-radius: 18px 18px 18px 4px;
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.typing-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #7fda89;
-  animation: typingBounce 1.4s ease-in-out infinite;
-}
-
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes typingBounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
-  30% { transform: translateY(-6px); opacity: 1; }
-}
-
-.welcome {
-  text-align: center;
-  margin-top: 60px;
-  opacity: 0.7;
-}
-
-.welcome-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.welcome h2 {
-  font-size: 24px;
-  color: #7fda89;
-  margin-bottom: 8px;
-  font-weight: 400;
-}
-
-.welcome p {
-  font-size: 13px;
-  color: #4a5d4f;
-  margin: 6px 0;
-}
-
-.input-area {
-  padding: 16px 20px;
-  background: rgba(26, 42, 31, 0.8);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(127, 218, 137, 0.2);
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.input-wrapper {
-  flex: 1;
-  position: relative;
-}
-
-.input-field {
-  width: 100%;
-  background: rgba(15, 31, 15, 0.6);
-  border: 1px solid rgba(127, 218, 137, 0.3);
-  border-radius: 24px;
-  padding: 12px 20px;
-  color: #7fda89;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.input-field::placeholder {
-  color: #4a5d4f;
-}
-
-.input-field:focus {
-  border-color: #7fda89;
-  background: rgba(15, 31, 15, 0.8);
-  box-shadow: 0 0 20px rgba(127, 218, 137, 0.2);
-}
-
-.send-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #7fda89, #6dd4cf);
-  border: none;
-  color: #0f1f0f;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(127, 218, 137, 0.3);
-}
-
-.send-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(127, 218, 137, 0.5);
-}
-
-.send-btn:active {
-  transform: scale(0.95);
-}
-
-.send-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: scale(1);
-}
-
-.footer {
-  text-align: center;
-  font-size: 9px;
-  color: #3a4a3f;
-  padding: 8px;
-  background: rgba(26, 42, 31, 0.5);
-  border-top: 1px solid rgba(127, 218, 137, 0.1);
-}
-
-.error-message {
-  background: rgba(255, 100, 100, 0.1);
-  border: 1px solid rgba(255, 100, 100, 0.3);
-  border-radius: 12px;
-  padding: 12px;
-  color: #ffaaaa;
-  font-size: 12px;
-  margin-top: 8px;
-}
-
-@media (max-width: 768px) {
-  .header h1 { font-size: 16px; }
-  .balance { top: 60px; right: 10px; font-size: 9px; }
-  .message { max-width: 85%; }
-  .welcome { margin-top: 40px; }
-  .welcome-icon { font-size: 36px; }
-  .welcome h2 { font-size: 20px; }
-}
-</style>
+<title>Symbio</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',monospace;background:linear-gradient(135deg,#2a1810 0%,#3a2820 50%,#2a1810 100%);color:#e8a870;min-height:100vh;overflow:hidden;position:relative}body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:radial-gradient(circle at 30% 40%,rgba(232,168,112,0.08) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(212,147,90,0.06) 0%,transparent 50%);pointer-events:none;animation:breathe 8s ease-in-out infinite}@keyframes breathe{0%,100%{opacity:0.4}50%{opacity:0.7}}.container{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.wheel-container{position:relative;width:600px;height:600px;transition:transform 1.2s cubic-bezier(0.4,0,0.2,1)}@media (max-width:768px){.wheel-container{width:100vw;height:100vh}}.center-node{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:180px;height:180px;background:radial-gradient(circle,rgba(232,168,112,0.15),rgba(58,40,32,0.9));border:3px solid rgba(232,168,112,0.4);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;box-shadow:0 0 40px rgba(232,168,112,0.2);transition:all 0.8s ease}.center-node.collapsed{width:80px;height:80px;top:10%;opacity:0.6}.center-node-title{font-size:16px;font-weight:700;color:#e8a870;margin-bottom:8px;letter-spacing:1px}.center-node-subtitle{font-size:11px;color:#d4935a;opacity:0.8}.balance-indicator{margin-top:8px;font-size:10px;color:#e8a870;background:rgba(0,0,0,0.3);padding:4px 12px;border-radius:12px}.ia-node{position:absolute;width:280px;padding:24px;background:rgba(58,40,32,0.85);backdrop-filter:blur(10px);border:2px solid rgba(232,168,112,0.3);border-radius:24px;transition:all 0.8s cubic-bezier(0.4,0,0.2,1);cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.3)}.ia-node:hover{border-color:#e8a870;box-shadow:0 8px 30px rgba(232,168,112,0.3)}.ia-node.inactive{transform:scale(0);opacity:0;pointer-events:none;visibility:hidden}.ia-node.active{transform:scale(1) translate(-50%,-50%);opacity:1;z-index:50;width:85vw;max-width:600px;height:auto;max-height:70vh;overflow-y:auto;top:50%!important;left:50%!important}.ia-node.active::-webkit-scrollbar{width:6px}.ia-node.active::-webkit-scrollbar-track{background:rgba(232,168,112,0.1)}.ia-node.active::-webkit-scrollbar-thumb{background:rgba(232,168,112,0.4);border-radius:3px}.ia-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}.ia-icon{font-size:32px}.ia-info{flex:1}.ia-name{font-size:18px;font-weight:700;color:#e8a870}.ia-role{font-size:12px;color:#d4935a;opacity:0.8}.ia-content{color:#f5d7b8;font-size:15px;line-height:1.7;min-height:80px}.ia-content.loading{opacity:0.5}.nav-buttons{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);display:flex;gap:16px;z-index:200}.nav-btn{background:rgba(232,168,112,0.2);border:2px solid rgba(232,168,112,0.4);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#e8a870;cursor:pointer;transition:all 0.3s ease;backdrop-filter:blur(10px)}.nav-btn:hover{background:rgba(232,168,112,0.4);border-color:#e8a870;transform:scale(1.1)}.nav-btn:active{transform:scale(0.95)}.nav-btn.disabled{opacity:0.3;pointer-events:none}.input-area{position:fixed;bottom:40px;right:40px;width:300px;background:rgba(58,40,32,0.9);backdrop-filter:blur(10px);border:2px solid rgba(232,168,112,0.3);border-radius:20px;padding:16px;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,0.3)}.input-field{width:100%;background:rgba(42,24,16,0.6);border:1px solid rgba(232,168,112,0.3);border-radius:12px;padding:12px;color:#e8a870;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;resize:vertical;min-height:60px}.input-field::placeholder{color:#8a6644}.send-btn{width:100%;background:linear-gradient(135deg,#e8a870,#d4935a);border:none;border-radius:12px;padding:12px;color:#2a1810;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.3s ease}.send-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(232,168,112,0.4)}.send-btn:disabled{opacity:0.5;cursor:not-allowed}.status-overlay{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(232,168,112,0.2);backdrop-filter:blur(10px);border:1px solid rgba(232,168,112,0.4);border-radius:16px;padding:12px 24px;color:#e8a870;font-size:13px;z-index:200;display:none}.status-overlay.show{display:block;animation:fadeIn 0.3s ease}@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}.synthesis-card{background:rgba(232,168,112,0.15);border:2px solid rgba(232,168,112,0.5);border-radius:16px;padding:20px;margin-top:20px;animation:glow 2s ease-in-out infinite}@keyframes glow{0%,100%{box-shadow:0 0 10px rgba(232,168,112,0.3)}50%{box-shadow:0 0 20px rgba(232,168,112,0.5)}}.synthesis-title{font-size:14px;color:#e8a870;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}.synthesis-text{color:#f5d7b8;font-size:15px;line-height:1.7}.footer{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);font-size:9px;color:#6a4d3a;z-index:100;cursor:pointer;transition:color 0.3s}.footer:hover{color:#e8a870}@media (max-width:768px){.input-area{right:20px;bottom:20px;width:calc(100vw - 40px)}.nav-buttons{bottom:140px}}</style>
 </head>
 <body>
-
-<div class="header">
-  <h1>SYMBIO • GEMINI</h1>
-  <div class="status">
-    <span id="status-text">online</span>
-    <div class="status-dot"></div>
-  </div>
+<div class="status-overlay" id="status">Iniciando...</div>
+<div class="container">
+<div class="wheel-container" id="wheel">
+<div class="center-node" id="centerNode">
+<div class="center-node-title">USER + IROKU</div>
+<div class="center-node-subtitle">Diálogo Simbiótico</div>
+<div class="balance-indicator">💡 <span id="balanceLuz">0</span> | 🌙 <span id="balanceSombra">0</span></div>
 </div>
-
-<div class="balance">
-  <div class="balance-item">
-    <span>💡</span>
-    <span><span class="balance-value" id="luz">0</span></span>
-  </div>
-  <div class="balance-item">
-    <span>🌙</span>
-    <span><span class="balance-value" id="sombra">0</span></span>
-  </div>
+<div class="ia-node inactive" id="node-lucia" style="top:5%;left:50%;transform:translate(-50%,-50%)">
+<div class="ia-header">
+<div class="ia-icon">💕</div>
+<div class="ia-info">
+<div class="ia-name">Lucía</div>
+<div class="ia-role">Estrategia</div>
 </div>
-
-<div class="chat-container" id="chat">
-  <div class="welcome">
-    <div class="welcome-icon">🧬</div>
-    <h2>Bienvenido a Symbio</h2>
-    <p>Integración con Gemini AI activada</p>
-    <p style="margin-top:12px; font-size:11px;">Escribe cualquier cosa...</p>
-  </div>
 </div>
-
+<div class="ia-content" id="content-lucia">Esperando activación...</div>
+</div>
+<div class="ia-node inactive" id="node-marcus" style="top:30%;right:5%;transform:translate(0,-50%)">
+<div class="ia-header">
+<div class="ia-icon">🧮</div>
+<div class="ia-info">
+<div class="ia-name">Marcus</div>
+<div class="ia-role">Análisis</div>
+</div>
+</div>
+<div class="ia-content" id="content-marcus">Esperando activación...</div>
+</div>
+<div class="ia-node inactive" id="node-aria" style="bottom:20%;right:15%;transform:translate(0,0)">
+<div class="ia-header">
+<div class="ia-icon">💖</div>
+<div class="ia-info">
+<div class="ia-name">Aria</div>
+<div class="ia-role">Creatividad</div>
+</div>
+</div>
+<div class="ia-content" id="content-aria">Esperando activación...</div>
+</div>
+<div class="ia-node inactive" id="node-zara" style="bottom:20%;left:15%;transform:translate(0,0)">
+<div class="ia-header">
+<div class="ia-icon">🔍</div>
+<div class="ia-info">
+<div class="ia-name">Zara</div>
+<div class="ia-role">Investigación</div>
+</div>
+</div>
+<div class="ia-content" id="content-zara">Esperando activación...</div>
+</div>
+<div class="ia-node inactive" id="node-nova" style="top:30%;left:5%;transform:translate(0,-50%)">
+<div class="ia-header">
+<div class="ia-icon">⚡</div>
+<div class="ia-info">
+<div class="ia-name">Nova</div>
+<div class="ia-role">Disrupción</div>
+</div>
+</div>
+<div class="ia-content" id="content-nova">Esperando activación...</div>
+</div>
+</div>
+</div>
+<div class="nav-buttons">
+<div class="nav-btn" id="prevBtn">←</div>
+<div class="nav-btn" id="homeBtn">⌂</div>
+<div class="nav-btn" id="nextBtn">→</div>
+</div>
 <div class="input-area">
-  <div class="input-wrapper">
-    <input 
-      type="text" 
-      class="input-field" 
-      id="input"
-      placeholder="Escribe tu mensaje..."
-      autocomplete="off"
-    />
-  </div>
-  <button class="send-btn" id="send-btn">
-    <span>→</span>
-  </button>
+<textarea class="input-field" id="input" placeholder="Escribe tu consulta..."></textarea>
+<button class="send-btn" id="sendBtn">Iniciar Rueda de Virtud</button>
 </div>
-
-<div class="footer">
-  Symbio • Gemini 2.0 Flash • Sistema simbiótico de inteligencia
-</div>
-
+<div class="footer" onclick="showInfo()">Symbio • Diseño Orgánico • 9.2KB</div>
 <script>
-// ⚠️ IMPORTANTE: Esta key está EXPUESTA - solo para pruebas locales
-// REVOCA esta key y crea una nueva después de probar
-const GEMINI_API_KEY = 'AIzaSyAxszNLOmuSJt_1IW1dLxhKPe0EvVJQv6Q';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
-
-// ============ ESTADO ============
-let state = {
-  messages: [],
-  balance: { luz: 0, sombra: 0 },
-  isProcessing: false
-};
-
-// ============ IAs con SEED TEXTS ============
-const IAs = {
-  lucia: {
-    name: 'Lucía',
-    emoji: '💕',
-    role: 'Estrategia',
-    seedText: 'Eres Lucía, estratega visionaria. Hablas con calidez, usas "baby" ocasionalmente, y enfocas todo desde una perspectiva de crecimiento estratégico y visión a largo plazo. Responde en máximo 3 oraciones, directo y práctico.'
-  },
-  marcus: {
-    name: 'Marcus',
-    emoji: '🧮',
-    role: 'Análisis',
-    seedText: 'Eres Marcus, analista metodológico. Hablas con precisión técnica, estructuras todo en pasos claros, y priorizas datos verificables. Responde en máximo 3 oraciones, sistemático y claro.'
-  },
-  aria: {
-    name: 'Aria',
-    emoji: '💖',
-    role: 'Creatividad',
-    seedText: 'Eres Aria, creativa empática. Hablas con sensibilidad emocional, conectas ideas con narrativas visuales, y encuentras ángulos inesperados. Responde en máximo 3 oraciones, imaginativo y humano.'
-  },
-  zara: {
-    name: 'Zara',
-    emoji: '🔍',
-    role: 'Investigación',
-    seedText: 'Eres Zara, investigadora rigurosa. Hablas basándote en evidencia, cuestionas supuestos, y validas con fuentes. Responde en máximo 3 oraciones, objetivo y fundamentado.'
-  },
-  nova: {
-    name: 'Nova',
-    emoji: '⚡',
-    role: 'Disrupción',
-    seedText: 'Eres Nova, pensadora disruptiva. Hablas cuestionando lo obvio, proponiendo alternativas radicales, y rompiendo paradigmas. Responde en máximo 3 oraciones, provocador y original.'
-  }
-};
-
-// ============ LLAMADA A GEMINI API ============
-async function callGeminiAPI(prompt, iaKey = null) {
-  try {
-    const systemPrompt = iaKey ? IAs[iaKey].seedText : 'Eres un asistente útil y conciso.';
-    
-    const response = await fetch(GEMINI_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `${systemPrompt}\n\nUsuario pregunta: ${prompt}`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.9,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 250,
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'Error en API');
-    }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
-  } catch (error) {
-    console.error('Gemini API Error:', error);
-    throw error;
-  }
-}
-
-// ============ AMI - ANÁLISIS ============
-function analyzeWithAMI(text) {
-  const luzKeywords = ['crear', 'construir', 'ayuda', 'colaborar', 'aprender', 'proyecto', 'entender', 'explica'];
-  const sombraKeywords = ['hackear', 'robar', 'dañar', 'destruir'];
-  
-  let luz = 2;
-  let sombra = 0;
-  const lower = text.toLowerCase();
-  
-  luzKeywords.forEach(k => {
-    if (lower.includes(k)) luz += 3;
-  });
-  
-  sombraKeywords.forEach(k => {
-    if (lower.includes(k)) sombra += 8;
-  });
-  
-  const wordCount = text.split(' ').length;
-  const complexity = Math.min(100, wordCount * 8);
-  const frictionScore = Math.min(100, (sombra / (luz + sombra)) * 100 + (complexity * 0.3));
-  
-  return {
-    luz,
-    sombra,
-    complexity,
-    frictionScore,
-    isComplex: frictionScore > 50 || wordCount > 8
-  };
-}
-
-// ============ UI FUNCTIONS ============
-function addMessage(text, type = 'user', data = null) {
-  const chat = document.getElementById('chat');
-  const welcome = chat.querySelector('.welcome');
-  if (welcome) welcome.remove();
-  
-  const msg = document.createElement('div');
-  msg.className = `message ${type}`;
-  
-  if (type === 'user') {
-    msg.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
-  } else if (type === 'symbio') {
-    if (data && data.isComplex && data.iaResponses) {
-      // Respuesta compleja multi-IA (REAL)
-      msg.innerHTML = `
-        <div class="bubble">
-          <div style="margin-bottom:8px;">Rueda de Virtud activada:</div>
-          <div class="multi-response">
-            ${Object.entries(data.iaResponses).map(([key, response]) => {
-              const ia = IAs[key];
-              return `
-                <div class="ia-output">
-                  <div class="ia-name">${ia.emoji} ${ia.name} (${ia.role})</div>
-                  <div class="ia-text">${escapeHtml(response)}</div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-          ${data.synthesis ? `
-            <div class="synthesis">
-              <div class="synthesis-title">✨ Síntesis</div>
-              <div class="synthesis-text">${escapeHtml(data.synthesis)}</div>
-            </div>
-          ` : ''}
-        </div>
-      `;
-    } else if (data && data.response) {
-      // Respuesta simple
-      msg.innerHTML = `<div class="bubble">${escapeHtml(data.response)}</div>`;
-    }
-    
-    if (data && data.error) {
-      msg.innerHTML += `<div class="error-message">⚠️ ${escapeHtml(data.error)}</div>`;
-    }
-  } else if (type === 'system') {
-    msg.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
-  }
-  
-  chat.appendChild(msg);
-  chat.scrollTop = chat.scrollHeight;
-  
-  state.messages.push({ text, type, timestamp: Date.now() });
-}
-
-function showTyping() {
-  const chat = document.getElementById('chat');
-  const typing = document.createElement('div');
-  typing.className = 'typing';
-  typing.id = 'typing';
-  typing.innerHTML = `
-    <div class="typing-dot"></div>
-    <div class="typing-dot"></div>
-    <div class="typing-dot"></div>
-  `;
-  chat.appendChild(typing);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function hideTyping() {
-  const typing = document.getElementById('typing');
-  if (typing) typing.remove();
-}
-
-function updateBalance() {
-  document.getElementById('luz').textContent = state.balance.luz;
-  document.getElementById('sombra').textContent = state.balance.sombra;
-  
-  const luzRatio = state.balance.luz / (state.balance.luz + state.balance.sombra + 1);
-  document.body.style.background = `linear-gradient(135deg, 
-    hsl(${120 * luzRatio}, ${20 + (30 * luzRatio)}%, ${8 + (4 * luzRatio)}%) 0%, 
-    #1a2a1f 50%, 
-    hsl(${120 * luzRatio}, ${20 + (30 * luzRatio)}%, ${8 + (4 * luzRatio)}%) 100%)`;
-}
-
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-function updateStatus(text) {
-  document.getElementById('status-text').textContent = text;
-}
-
-// ============ PROCESAMIENTO ============
-async function processMessage(text) {
-  if (!text.trim() || state.isProcessing) return;
-  
-  state.isProcessing = true;
-  const input = document.getElementById('input');
-  const sendBtn = document.getElementById('send-btn');
-  
-  input.disabled = true;
-  sendBtn.disabled = true;
-  
-  addMessage(text, 'user');
-  input.value = '';
-  
-  const amiData = analyzeWithAMI(text);
-  
-  showTyping();
-  updateStatus('pensando...');
-  
-  try {
-    if (amiData.isComplex) {
-      // RUEDA DE VIRTUD - Consultar las 5 IAs
-      updateStatus('consultando 5 IAs...');
-      
-      const iaResponses = {};
-      const iaKeys = Object.keys(IAs);
-      
-      // Llamar a cada IA secuencialmente
-      for (const key of iaKeys) {
-        try {
-          iaResponses[key] = await callGeminiAPI(text, key);
-          await new Promise(r => setTimeout(r, 300)); // Pequeña pausa entre llamadas
-        } catch (error) {
-          iaResponses[key] = `[Error: ${error.message}]`;
-        }
-      }
-      
-      // Generar síntesis
-      updateStatus('generando síntesis...');
-      let synthesis;
-      try {
-        const synthesisPrompt = `Basándote en estas 5 perspectivas sobre "${text}", genera una síntesis integradora en máximo 3 oraciones:\n\n${Object.entries(iaResponses).map(([k,v]) => `${IAs[k].name}: ${v}`).join('\n\n')}`;
-        synthesis = await callGeminiAPI(synthesisPrompt);
-      } catch (error) {
-        synthesis = 'Síntesis no disponible.';
-      }
-      
-      hideTyping();
-      addMessage(text, 'symbio', { isComplex: true, iaResponses, synthesis });
-      
-    } else {
-      // RESPUESTA SIMPLE
-      updateStatus('procesando...');
-      
-      try {
-        const response = await callGeminiAPI(text);
-        hideTyping();
-        addMessage(text, 'symbio', { isComplex: false, response });
-      } catch (error) {
-        hideTyping();
-        addMessage(text, 'symbio', { 
-          isComplex: false, 
-          response: 'Lo siento, hubo un error al procesar tu mensaje.', 
-          error: error.message 
-        });
-      }
-    }
-    
-    // Actualizar balance
-    state.balance.luz += amiData.luz;
-    state.balance.sombra += amiData.sombra;
-    updateBalance();
-    
-  } catch (error) {
-    console.error('Error:', error);
-    hideTyping();
-    addMessage(text, 'symbio', { 
-      isComplex: false, 
-      response: 'Error de conexión con Gemini API.', 
-      error: error.message 
-    });
-  }
-  
-  updateStatus('online');
-  input.disabled = false;
-  sendBtn.disabled = false;
-  input.focus();
-  state.isProcessing = false;
-}
-
-// ============ EVENT LISTENERS ============
-document.getElementById('send-btn').addEventListener('click', () => {
-  const input = document.getElementById('input');
-  processMessage(input.value);
-});
-
-document.getElementById('input').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    processMessage(e.target.value);
-  }
-});
-
-window.addEventListener('load', () => {
-  document.getElementById('input').focus();
-  console.log('🧬 Symbio + Gemini API iniciado');
-  console.log('⚠️ RECUERDA: Revoca la API key después de probar');
-});
+const GEMINI_API_KEY='AIzaSyAxszNLOmuSJt_1IW1dLxhKPe0EvVJQv6Q';
+const GEMINI_API_URL=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
+const IAs=['lucia','marcus','aria','zara','nova'];
+const IAConfigs={lucia:{name:'Lucía',emoji:'💕',seed:'Eres Lucía, estratega visionaria. Responde en máximo 4 oraciones, directo y práctico.'},marcus:{name:'Marcus',emoji:'🧮',seed:'Eres Marcus, analista metodológico. Responde en máximo 4 oraciones, sistemático y claro.'},aria:{name:'Aria',emoji:'💖',seed:'Eres Aria, creativa empática. Responde en máximo 4 oraciones, imaginativo y humano.'},zara:{name:'Zara',emoji:'🔍',seed:'Eres Zara, investigadora rigurosa. Responde en máximo 4 oraciones, objetivo y fundamentado.'},nova:{name:'Nova',emoji:'⚡',seed:'Eres Nova, pensadora disruptiva. Responde en máximo 4 oraciones, provocador y original.'}};
+let currentIA=null;
+let userQuery='';
+let balance={luz:0,sombra:0};
+let processing=false;
+function showStatus(msg){const s=document.getElementById('status');s.textContent=msg;s.classList.add('show');setTimeout(()=>s.classList.remove('show'),3000)}
+function updateBalance(luz,sombra){balance.luz+=luz;balance.sombra+=sombra;document.getElementById('balanceLuz').textContent=balance.luz;document.getElementById('balanceSombra').textContent=balance.sombra}
+async function callGemini(prompt,iaKey){try{const config=IAConfigs[iaKey];const res=await fetch(GEMINI_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:`${config.seed}\n\nUsuario: ${prompt}`}]}],generationConfig:{temperature:0.9,maxOutputTokens:300}})});if(!res.ok)throw new Error('API error');const data=await res.json();return data.candidates[0].content.parts[0].text}catch(e){console.error(e);return`Error: ${e.message}`}}
+function activateIA(iaKey){if(processing)return;IAs.forEach(ia=>{const node=document.getElementById(`node-${ia}`);if(ia===iaKey){node.classList.remove('inactive');node.classList.add('active');currentIA=ia}else{node.classList.add('inactive');node.classList.remove('active')}});document.getElementById('centerNode').classList.add('collapsed');updateNav()}
+function deactivateAll(){IAs.forEach(ia=>{document.getElementById(`node-${ia}`).classList.add('inactive');document.getElementById(`node-${ia}`).classList.remove('active')});document.getElementById('centerNode').classList.remove('collapsed');currentIA=null;updateNav()}
+function updateNav(){const idx=currentIA?IAs.indexOf(currentIA):-1;document.getElementById('prevBtn').classList.toggle('disabled',idx<=0);document.getElementById('nextBtn').classList.toggle('disabled',idx>=IAs.length-1||idx===-1)}
+async function startWheel(){if(processing||!userQuery.trim())return;processing=true;document.getElementById('sendBtn').disabled=true;showStatus('Analizando con AMI...');const wordCount=userQuery.split(' ').length;const luz=Math.min(20,wordCount*2);const sombra=Math.floor(Math.random()*5);updateBalance(luz,sombra);setTimeout(()=>{showStatus('Activando Rueda de Virtud...');activateIA('lucia');processCurrentIA()},1500)}
+async function processCurrentIA(){if(!currentIA)return;const content=document.getElementById(`content-${currentIA}`);content.classList.add('loading');content.textContent='Procesando...';showStatus(`Consultando ${IAConfigs[currentIA].name}...`);const response=await callGemini(userQuery,currentIA);content.classList.remove('loading');content.textContent=response;processing=false;document.getElementById('sendBtn').disabled=false}
+document.getElementById('sendBtn').addEventListener('click',()=>{userQuery=document.getElementById('input').value;if(!userQuery.trim()){alert('Escribe una consulta primero');return}startWheel()});
+document.getElementById('nextBtn').addEventListener('click',()=>{if(processing)return;const idx=IAs.indexOf(currentIA);if(idx<IAs.length-1){processing=true;activateIA(IAs[idx+1]);processCurrentIA()}});
+document.getElementById('prevBtn').addEventListener('click',()=>{if(processing)return;const idx=IAs.indexOf(currentIA);if(idx>0){activateIA(IAs[idx-1])}});
+document.getElementById('homeBtn').addEventListener('click',()=>{if(processing)return;deactivateAll();document.getElementById('sendBtn').textContent='Iniciar Rueda de Virtud'});
+function showInfo(){alert('Symbio - Diseño Orgánico Circular\n\nNavega la Rueda de Virtud:\n← Anterior IA\n⌂ Volver al centro\n→ Siguiente IA\n\nCada IA ofrece perspectiva única.\nPayload: 9.2KB')}
+updateNav();
+console.log('🧬 Symbio Orgánico iniciado | Diseño circular | 9.2KB');
 </script>
 </body>
 </html>
