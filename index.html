@@ -1,260 +1,182 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Simbyon Ecosystem v1.0 — Technical / Functional Overview</title>
-<meta name="description" content="Simbyon — technical-functional overview, KPIs, manifest and downloadable README for demos & GitHub Pages." />
-<style>
-  :root{
-    --bg:#0b0f12; --card:#0f1720; --muted:#94a3b8; --accent:#f6c26b;
-    --glass: rgba(255,255,255,0.03);
-  }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background: linear-gradient(180deg,#071018 0%, #0b0f12 60%); color:#e6eef6;}
-  .wrap{max-width:1100px;margin:28px auto;padding:20px;}
-  header{display:flex;gap:16px;align-items:center}
-  .logo{width:76px;height:76px;border-radius:14px;background:linear-gradient(135deg,#13232f,#0b3b2a);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);box-shadow:0 6px 30px rgba(0,0,0,0.6)}
-  h1{font-size:20px;margin:0 0 4px}
-  p.lead{margin:0;color:var(--muted);font-size:13px}
-  main{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:18px}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-  section h2{margin:0 0 8px;font-size:16px;color:var(--accent)}
-  small.muted{color:var(--muted);display:block;margin-top:6px;font-size:12px}
-  ul{margin:8px 0 0 18px;color:#dbeafe}
-  .kpi{display:flex;gap:8px;flex-wrap:wrap}
-  .metric{background:var(--glass);padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);min-width:120px}
-  .metric .value{font-weight:700;font-size:18px}
-  .controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-  button{background:linear-gradient(90deg,#f6c26b,#f4a261);border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;color:#071017}
-  .muted-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
-  pre{background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;overflow:auto;font-size:12px;color:#dbeafe}
-  footer{margin-top:18px;color:var(--muted);font-size:12px;text-align:center}
-  .manifest{font-family:monospace;font-size:12px;white-space:pre-wrap}
-  @media(max-width:980px){main{grid-template-columns:1fr}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Symbyon — Silent Alpha Monitor</title>
+  <meta name="description" content="Monitor experimental de red simbiótica de 10 nodos — proyecto open-source ficticio pero muy bonito." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>DNA</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --green: #4ade80;
+      --cyan: #06b6d4;
+      --violet: #7c3aed;
+      --amber: #f59e0b;
+      --pink: #ec4899;
+      --emerald: #10b981;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    header {
+      padding: 1rem 1.5rem;
+      font-size: 600 1.5rem/1.2 'Inter';
+      border-bottom: 1px solid var(--border);
+      background: rgba(22, 27, 34, 0.8);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .panel:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    h2 {
+      margin: 0 0 0.8rem 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    #network {
+      flex: 1;
+      position: relative;
+      background: #0d1117;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: grab;
+    }
+    #network:active { cursor: grabbing; }
+    canvas#netCanvas { display: block; width: 100%; height: 100%; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th { color: var(--text-muted); font-weight: 500; }
+    .status {
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .active { background: rgba(74,222,128,0.2); color: var(--green); }
+    .idle { background: rgba(251,191,36,0.2); color: #fbbf24; }
+
+    .log {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    .log-line {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+      opacity: 0.9;
+    }
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      height: 200px;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 1024px) {
+      .container { grid-template-columns: 1fr; }
+      .charts { grid-template-columns: 1fr; height: auto; }
+    }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="logo">SYM</div>
-    <div>
-      <h1>Simbyon Ecosystem — v1.0</h1>
-      <p class="lead">Technical & functional overview • lightweight nano-apps architecture • AMI coherence engine • demo-ready artifacts</p>
-    </div>
-  </header>
+  <header>DNA Symbyon — Silent Alpha Monitor (10 nodos experimentales)</header>
 
-  <main>
-    <div class="card">
-      <section aria-labelledby="overview">
-        <h2 id="overview">Overview (Technical & Functional)</h2>
-        <p class="muted">Simbyon is a lightweight, offline-capable stack of nano-apps that together form a verification-first symbiotic network. Each app targets a core function: governance, traceability, mesh communications, energy & verification.</p>
-        <ul>
-          <li><strong>Design principle:</strong> Nano-apps ≤ 15KB each, zero external runtime deps (vanilla HTML/CSS/JS).</li>
-          <li><strong>Core module:</strong> <em>AMI (Autonomous Merit Intelligence)</em> — coherence verifier and policy guard.</li>
-          <li><strong>Deployment model:</strong> PWA/sandbox for demos; edge nodes (phones/drones/nodes) for mesh; SimbioChain for immutable anchoring.</li>
-        </ul>
-        <small class="muted">Intended for demos, pilots and GitHub Pages. All simulated metrics are clearly labelled for demo purposes.</small>
-      </section>
-
-      <section aria-labelledby="apps" style="margin-top:14px">
-        <h2 id="apps">Core apps (v1.0)</h2>
-        <ul>
-          <li><strong>Symbiolytics</strong> — AMI engine, score + certificate generator (demo: 12.5KB).</li>
-          <li><strong>SymbioChain Explorer</strong> — ledger explorer & node dashboard (demo: ~9.1KB).</li>
-          <li><strong>SymbioChat</strong> — collaborative dialogue + virtue wheel (seeded IA personas).</li>
-          <li><strong>SymbioMesh</strong> — offline mesh comms visualiser & node share.</li>
-          <li><strong>SolarMesh</strong> — energy management, tokenization & self-heal simulation.</li>
-        </ul>
-      </section>
-
-      <section aria-labelledby="ami" style="margin-top:14px">
-        <h2 id="ami">AMI — role & responsibilities</h2>
-        <p class="muted">AMI is the coherence gatekeeper. It evaluates proposals and evidence on five axes: <strong>Origin, Lineage, Semantics, Integrity, Risk</strong>. It also acts as an ethical guard (detects attempts to produce fraudulent receipts, illicit content, or manipulative behaviour) and issues immutable certificates (demo tokens: SYM-XXXX).</p>
-        <pre><code>// score example (demo)
-score = round(origin*0.25 + lineage*0.20 + semantics*0.20 + integrity*0.15 + risk*0.20)
-</code></pre>
-      </section>
-
-      <section aria-labelledby="deployment" style="margin-top:14px">
-        <h2 id="deployment">Deployment & dev notes</h2>
-        <ul>
-          <li>Local demo: open HTML file in browser (works offline).</li>
-          <li>PWA: add manifest + service worker for offline caching (recommended for field demos).</li>
-          <li>Production anchors: IPFS / SimbioChain anchors and signatures for certificates.</li>
-          <li>Edge nodes: phones, dedicated Sotolín-inspired devices, later drone/nanosat swarms.</li>
-        </ul>
-      </section>
-
-      <section aria-labelledby="manifest" style="margin-top:14px">
-        <h2 id="manifest">Manifest (quick)</h2>
-        <div class="manifest" id="manifestPreview"></div>
-      </section>
+  <div class="container">
+    <!-- Red interactiva -->
+    <div class="panel">
+      <h2>Red Simbiótica</h2>
+      <div id="network"><canvas id="netCanvas"></canvas></div>
     </div>
 
-    <!-- right column -->
-    <aside class="card">
-      <section>
-        <h2>Demo KPIs (simulated)</h2>
-        <div class="kpi" style="margin-top:10px">
-          <div class="metric">
-            <div class="label">Nodes</div>
-            <div class="value value-nodes">1,247</div>
-            <small class="muted">active mesh nodes (sim)</small>
-          </div>
-          <div class="metric">
-            <div class="label">AMI Avg</div>
-            <div class="value value-ami">78.3%</div>
-            <small class="muted">coherence score (sim)</small>
-          </div>
-          <div class="metric">
-            <div class="label">Certificates</div>
-            <div class="value value-certs">3,891</div>
-            <small class="muted">simulated anchors</small>
-          </div>
-          <div class="metric">
-            <div class="label">TokenSupply</div>
-            <div class="value value-tokens">2,400,000 ◎</div>
-            <small class="muted">demo token (SolarMesh)</small>
-          </div>
-        </div>
+    <!-- Actividad reciente -->
+    <div class="panel">
+      <h2>Actividad en tiempo real</h2>
+      <div class="log" id="events"></div>
+    </div>
 
-        <div class="controls" style="margin-top:12px">
-          <button id="incNodes">+ nodes</button>
-          <button id="decNodes" class="muted-btn">- nodes</button>
-          <button id="randomize" class="muted-btn">randomize KPI</button>
-        </div>
+    <!-- Tabla de nodos -->
+    <div class="panel" style="grid-column: 1 / -1;">
+      <h2>Nodos activos</h2>
+      <table id="nodeTable"></table>
+    </div>
 
-        <div style="margin-top:12px">
-          <button id="downloadReadme">Download README.md</button>
-          <button id="downloadManifest" class="muted-btn">Download manifest.json</button>
-        </div>
+    <!-- Gráficos -->
+    <div class="panel" style="grid-column: 1 / -1;">
+      <h2>Pulsos y Resonancia colectiva</h2>
+      <div class="charts">
+        <canvas id="pulseChart"></canvas>
+        <canvas id="resonanceChart"></canvas>
+      </div>
+    </div>
+  </div>
 
-        <div style="margin-top:14px">
-          <h2 style="font-size:14px;margin-bottom:6px">Quick Links</h2>
-          <small class="muted">Local demo artifacts</small>
-          <ul style="margin-top:6px">
-            <li><a href="#" id="linkSymbiolytics">Symbiolytics (demo HTML)</a></li>
-            <li><a href="#" id="linkExplorer">SymbioChain Explorer (demo HTML)</a></li>
-            <li><a href="#" id="linkSolar">SolarMesh (demo HTML)</a></li>
-          </ul>
-        </div>
-      </section>
-    </aside>
-  </main>
-
-  <footer class="card" style="margin-top:18px">
-    <strong>Simbyon Ecosystem v1.0</strong> — lightweight nano-apps • AMI coherence layer • demo artifacts included. Built for demos, pilots and GitHub Pages.  
-    <div style="margin-top:8px;color:var(--muted)">Generated: <span id="generatedAt"></span></div>
+  <footer>
+    Symbyon Silent Alpha © 2025 — Proyecto ficticio open-source • <a href="https://github.com/tu-usuario/symbyon-monitor" style="color:#58a6ff;">github.com/tu-usuario/symbyon-monitor</a>
   </footer>
-</div>
 
-<script>
-(function(){
-  // manifest data (keeps short & factual)
-  const manifest = {
-    name: "Simbyon Ecosystem",
-    version: "v1.0",
-    apps: [
-      { id:"symbiolytics", name:"Symbiolytics", role:"AMI engine, certificate issuer", demo_kb:12.5 },
-      { id:"explorer", name:"SymbioChain Explorer", role:"Ledger explorer & node dashboard", demo_kb:9.1 },
-      { id:"chat", name:"SymbioChat", role:"Collaborative dialogue + virtue wheel", demo_kb:9.2 },
-      { id:"mesh", name:"SymbioMesh", role:"Offline mesh comms & node visualizer", demo_kb:10.4 },
-      { id:"solar", name:"SolarMesh", role:"Energy management & tokenization", demo_kb:14.0 }
-    ],
-    core_module: "AMI (Autonomous Merit Intelligence)",
-    principles: ["nano-apps","offline-first","zero-external-deps","coherence-first"]
-  };
-
-  // fill manifest preview
-  document.getElementById('manifestPreview').textContent = JSON.stringify(manifest, null, 2);
-
-  // initial KPI elements
-  const nodesEl = document.querySelector('.value-nodes');
-  const amiEl = document.querySelector('.value-ami');
-  const certEl = document.querySelector('.value-certs');
-  const tokenEl = document.querySelector('.value-tokens');
-  let nodes = 1247, ami = 78.3, certs = 3891, tokens = 2400000;
-
-  function renderKPI(){ nodesEl.textContent = nodes.toLocaleString(); amiEl.textContent = (Math.round(ami*10)/10).toFixed(1) + '%'; certEl.textContent = certs.toLocaleString(); tokenEl.textContent = tokens.toLocaleString() + ' ◎'; }
-  renderKPI();
-
-  // interactions
-  document.getElementById('incNodes').addEventListener('click', ()=>{
-    nodes += Math.floor(Math.random()*80)+20; certs += Math.floor(Math.random()*20)+5; ami = Math.min(99, ami + (Math.random()*1.2));
-    renderKPI();
-  });
-  document.getElementById('decNodes').addEventListener('click', ()=>{
-    nodes = Math.max(0, nodes - (Math.floor(Math.random()*80)+20)); certs = Math.max(0, certs - (Math.floor(Math.random()*20)+5)); ami = Math.max(10, ami - (Math.random()*1.5));
-    renderKPI();
-  });
-  document.getElementById('randomize').addEventListener('click', ()=>{
-    nodes = Math.floor(900 + Math.random()*2000); certs = Math.floor(1500 + Math.random()*8000); ami = Math.round((60 + Math.random()*30)*10)/10; tokens = 1000000 + Math.floor(Math.random()*5000000);
-    renderKPI();
-  });
-
-  // download README (constructed from manifest + short description)
-  function buildReadme(){
-    const lines = [];
-    lines.push('# Simbyon Ecosystem v1.0');
-    lines.push('');
-    lines.push('Technical & functional overview — demo artifacts for GitHub Pages.');
-    lines.push('');
-    lines.push('## Summary');
-    lines.push('- Lightweight nano-apps architecture (each app ≤ ~15KB demo).');
-    lines.push('- Core module: AMI (Autonomous Merit Intelligence) — coherence verification.');
-    lines.push('- Offline-first, PWA-ready, designed for mesh deployment and anchors to SimbioChain.');
-    lines.push('');
-    lines.push('## Apps (v1.0)');
-    manifest.apps.forEach(a => lines.push(`- **${a.name}** — ${a.role} (demo: ~${a.demo_kb} KB)`));
-    lines.push('');
-    lines.push('## Manifest');
-    lines.push('```json');
-    lines.push(JSON.stringify(manifest, null, 2));
-    lines.push('```');
-    lines.push('');
-    lines.push('## Demo KPIs (simulated)');
-    lines.push(`- Nodes: ${nodes}`);
-    lines.push(`- AMI Avg: ${ami.toFixed(1)}%`);
-    lines.push(`- Certificates: ${certs}`);
-    lines.push('');
-    lines.push('## Deployment notes');
-    lines.push('- Run as static HTML for demos/pilot.');
-    lines.push('- Add PWA manifest + service worker for offline caching in the field.');
-    lines.push('- Anchor certificates to IPFS / SimbioChain in production.');
-    lines.push('');
-    lines.push('---');
-    lines.push('Generated by: Simbyon demo generator');
-    return lines.join('\\n');
-  }
-
-  function downloadFile(filename, content, mime='text/plain'){
-    const blob = new Blob([content], {type: mime});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename; document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1500);
-  }
-
-  document.getElementById('downloadReadme').addEventListener('click', ()=>{
-    downloadFile('README-Simbyon-v1.md', buildReadme(), 'text/markdown');
-  });
-
-  document.getElementById('downloadManifest').addEventListener('click', ()=>{
-    downloadFile('simbyon-manifest.json', JSON.stringify(manifest, null, 2), 'application/json');
-  });
-
-  // placeholder demo HTML links (downloads of minimal demo shells)
-  function makeDemoHtml(name){
-    return `data:text/html,${encodeURIComponent(`<meta charset="utf-8"><title>${name} - demo</title><style>body{background:#071018;color:#fff;font-family:Arial;padding:20px}</style><h1>${name} (demo)</h1><p>Lightweight demo shell. Replace with actual app HTML when ready.</p><pre>${JSON.stringify(manifest, null,2)}</pre>`)}`;
-  }
-
-  document.getElementById('linkSymbiolytics').href = makeDemoHtml('Symbiolytics');
-  document.getElementById('linkExplorer').href = makeDemoHtml('SymbioChain Explorer');
-  document.getElementById('linkSolar').href = makeDemoHtml('SolarMesh');
-
-  // timestamp
-  document.getElementById('generatedAt').textContent = new Date().toISOString().slice(0,19).replace('T',' ');
-})();
-</script>
-</body>
-</html>
+  <script>
+    // === Datos iniciales ===
+    const nodes = [
+      { id: 1,  name: "simbionte-1",  arch: "Artífice",       status: "active", color: "#4ade80", x:0.2, y:0.3
